@@ -1,0 +1,42 @@
+# Declarative Automation Bundle for the IPL data project
+# Defines a Lakeflow Spark Declarative Pipeline that orchestrates
+# JSON ingestion and silver-layer transformations.
+#
+# Pipeline flow:
+#   ingestion/JSON_Ingestion  ->  ipl.s1_raw.ipl_data
+#   silver/LoadMatches        ->  ipl.s2_silver.matches
+#   silver/LoadInnings        ->  ipl.s2_silver.innings
+#   silver/LoadPlaying11      ->  ipl.s2_silver.playing11
+
+bundle:
+  name: ipl_dbx_databricks
+
+variables:
+  catalog:
+    description: "Unity Catalog catalog for IPL pipeline tables"
+    default: ipl
+
+targets:
+  dev:
+    mode: development
+    default:
+      pipeline:
+        development: true
+
+resources:
+  pipelines:
+    ipl_silver_pipeline:
+      name: ipl-silver-pipeline
+      catalog: ${var.catalog}
+      target: s2_silver
+      serverless: true
+      development: true
+      libraries:
+        - notebook:
+            path: /Workspace/Users/pavann.karanam@gmail.com/IPL-DBx/ingestion/JSON_Ingestion
+        - notebook:
+            path: /Workspace/Users/pavann.karanam@gmail.com/IPL-DBx/silver/LoadMatches
+        - notebook:
+            path: /Workspace/Users/pavann.karanam@gmail.com/IPL-DBx/silver/LoadInnings
+        - notebook:
+            path: /Workspace/Users/pavann.karanam@gmail.com/IPL-DBx/silver/LoadPlaying11
